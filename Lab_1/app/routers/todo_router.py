@@ -7,7 +7,7 @@ from app.repositories.todo_repository import TodoRepository
 
 router = APIRouter()
 
-todo_repository = TodoRepository()
+todo_repository = TodoRepository() 
 
 def get_todo_service() -> TodoService:
     return TodoService(todo_repository)
