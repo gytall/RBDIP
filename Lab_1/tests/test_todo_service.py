@@ -5,7 +5,6 @@ from app.models import TodoCreate, TodoUpdate
 
 @pytest.fixture
 def todo_service():
-    """Создаем экземпляр сервиса с чистым хранилищем перед каждым тестом"""
     return TodoService(TodoRepository())
 
 def test_create_todo(todo_service):
