@@ -33,7 +33,6 @@ class UserRepository:
                     user.username = user_update.username
                 if user_update.email:
                     user.email = user_update.email
-                # Пароль не храним — игнорируем
                 return user
         return None
 

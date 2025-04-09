@@ -7,7 +7,7 @@ from typing import List, Optional
 class UserService:
     def __init__(self, repository: UserRepository):
         self.repository = repository
-        self.history = []  # История действий (как в todo)
+        self.history = []  
 
     def get_all_users(self) -> List[UserResponse]:
         if len(self.history) > 0:
