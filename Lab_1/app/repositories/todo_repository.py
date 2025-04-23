@@ -22,21 +22,34 @@ class TodoRepository:
         return None  
 
     def create(self, todo_create: TodoCreate) -> TodoResponse:
-        new_todo = TodoResponse(id=self.counter, title=todo_create.title, description=todo_create.description, completed=False)
-        self.todos.append(new_todo)  
-        self.counter += 1  
+        new_todo = self._build_todo(todo_create)
+        self.todos.append(new_todo)
+        self.counter += 1
         return new_todo
 
+    def _build_todo(self, todo_create: TodoCreate) -> TodoResponse:
+        return TodoResponse(
+            id=self.counter,
+            title=todo_create.title,
+            description=todo_create.description,
+            completed=False
+        )
+
     def update(self, todo_id: int, todo_update: TodoUpdate) -> Optional[TodoResponse]:
-        for todo in self.todos:
-            if todo.id == todo_id:
-                if todo_update.title:
-                    todo.title = todo_update.title
-                if todo_update.description:
-                    todo.description = todo_update.description
-                todo.completed = todo_update.completed if todo_update.completed is not None else todo.completed  
-                return todo
-        return None  
+        todo = self.get_by_id(todo_id)
+        if todo:
+            self._apply_todo_update(todo, todo_update)
+            return todo
+        return None
+
+    def _apply_todo_update(self, todo: TodoResponse, update: TodoUpdate) -> None:
+        if update.title:
+            todo.title = update.title
+        if update.description:
+            todo.description = update.description
+        if update.completed is not None:
+            todo.completed = update.completed
+    
 
     def delete(self, todo_id: int) -> bool:
         for todo in self.todos:

@@ -26,15 +26,10 @@ class TodoService:
         return new_todo
 
     def update_todo(self, todo_id: int, todo_update: TodoUpdate) -> Optional[TodoResponse]:
-        todo = self.repository.get_by_id(todo_id)
-        if todo:
-            updated_todo = self.repository.update(todo_id, todo_update)
-            if updated_todo:
-                return updated_todo
-            else:
-                return None
-        else:
-            return None  
+        if not self.repository.get_by_id(todo_id):
+            return None
+        return self.repository.update(todo_id, todo_update)
+    
 
     def delete_todo(self, todo_id: int) -> bool:
       
