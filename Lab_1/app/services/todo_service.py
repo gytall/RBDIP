@@ -1,41 +1,42 @@
-# app/services/todo_service.py
-from app.repositories.todo_repository import TodoRepository
-from app.models import TodoCreate, TodoUpdate, TodoResponse
+from sqlalchemy.orm import Session
+from app.models import TodoCreate, TodoUpdate
+from app.db_models import Todo
 from typing import List, Optional
 
-class TodoService:
-    def __init__(self, repository: TodoRepository):
-        self.repository = repository
-        self.history = []  
-    def get_all_todos(self) -> List[TodoResponse]:
-        if len(self.history) > 0:
-            return self.repository.get_all()  
-        else:
-            return self.repository.get_all() 
 
-    def get_todo_by_id(self, todo_id: int) -> Optional[TodoResponse]:
-        todo = self.repository.get_by_id(todo_id)
-        if todo is None:
-            return None  
-        else:
-            return todo 
+def get_all(db: Session, skip: int = 0, limit: int = 10) -> List[Todo]:
+    return db.query(Todo).order_by(Todo.id).offset(skip).limit(limit).all()
 
-    def create_todo(self, todo_create: TodoCreate) -> TodoResponse:
-        new_todo = self.repository.create(todo_create)
-        self.history.append(f"Created new todo with ID: {new_todo.id}")  
-        return new_todo
 
-    def update_todo(self, todo_id: int, todo_update: TodoUpdate) -> Optional[TodoResponse]:
-        if not self.repository.get_by_id(todo_id):
-            return None
-        return self.repository.update(todo_id, todo_update)
-    
+def get_by_id(db: Session, todo_id: int) -> Optional[Todo]:
+    return db.query(Todo).filter(Todo.id == todo_id).first()
 
-    def delete_todo(self, todo_id: int) -> bool:
-      
-        todo = self.repository.get_by_id(todo_id)
-        if todo is not None:
-            self.repository.delete(todo_id)
-            return True
-        else:
-            return False  
+
+def create(db: Session, todo_create: TodoCreate) -> Todo:
+    todo = Todo(
+        title=todo_create.title,
+        description=todo_create.description,
+        completed=False
+    )
+    db.add(todo)
+    return todo
+
+
+def update(db: Session, todo_id: int, todo_update: TodoUpdate) -> Optional[Todo]:
+    result = db.query(Todo).filter(Todo.id == todo_id).first()
+    if not result:
+        return None
+
+    if todo_update.title is not None:
+        result.title = todo_update.title
+    if todo_update.description is not None:
+        result.description = todo_update.description
+    if todo_update.completed is not None:
+        result.completed = todo_update.completed
+
+    return result
+
+
+def delete(db: Session, todo_id: int) -> bool:
+    result = db.query(Todo).filter(Todo.id == todo_id).delete(synchronize_session=False)
+    return result > 0
